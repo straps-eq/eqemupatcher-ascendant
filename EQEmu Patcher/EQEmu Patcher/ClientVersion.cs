@@ -15,7 +15,8 @@ namespace EQEmu_Patcher
         Seeds_Of_Destruction,
         Underfoot,
         Secrets_Of_Feydwer,
-        Broken_Mirror
+        Broken_Mirror,
+        The_Outer_Brood
     }
 
     class ClientVersion

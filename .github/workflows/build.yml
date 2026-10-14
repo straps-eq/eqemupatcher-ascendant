@@ -12,8 +12,9 @@ env:
   SERVER_NAME: ${{ vars.SERVER_NAME == '' && 'EQEmu Patcher' || vars.SERVER_NAME }}
   FILE_NAME: ${{ vars.FILE_NAME == '' && 'eqemupatcher' || vars.FILE_NAME }}
   FILELIST_URL: ${{ vars.FILELIST_URL == '' && format('https://github.com/{0}/releases/latest/download/', github.repository) || vars.FILELIST_URL }}
-  PATCHER_URL: ${{ vars.PATCHER_URL == '' && format('https://github.com/{0}/releases/latest/download/', github.repository) || vars.PATCHER }}
+  PATCHER_URL: ${{ vars.PATCHER_URL == '' && format('https://github.com/{0}/releases/latest/download/', github.repository) || vars.PATCHER_URL }}
   STORAGE_URL: ${{ vars.STORAGE_URL == '' && format('https://raw.githubusercontent.com/{0}/master/rof/', github.repository) || vars.STORAGE_URL }}
+  TOB_STORAGE_URL: ${{ vars.TOB_STORAGE_URL == '' && format('https://raw.githubusercontent.com/{0}/master/tob/', github.repository) || vars.TOB_STORAGE_URL }}
 
 jobs:
   build:
@@ -43,6 +44,11 @@ jobs:
         move "../EQEmu Patcher/EQEmu Patcher/bin/Release/eqemupatcher.exe" "../EQEmu Patcher/EQEmu Patcher/bin/Release/${{env.FILE_NAME}}.exe"
         move eqemupatcher-hash.txt ${{env.FILE_NAME}}-hash.txt
 
+    - name: Generate ToB filelist
+      run: |
+        cd "tob"
+        ..\rof\filelistbuilder-win-x64.exe "tob" "${{env.TOB_STORAGE_URL}}"
+
     - name: Release
       uses: "marvinpinto/action-automatic-releases@latest"
       if: github.ref == 'refs/heads/master'
@@ -54,4 +60,5 @@ jobs:
         files: |
           EQEmu Patcher/EQEmu Patcher/bin/Release/${{env.FILE_NAME}}.exe
           rof/filelist_rof.yml
+          tob/filelist_tob.yml
           rof/${{env.FILE_NAME}}-hash.txt
