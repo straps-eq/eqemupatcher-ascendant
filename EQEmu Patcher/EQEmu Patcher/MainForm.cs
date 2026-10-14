@@ -41,8 +41,9 @@ namespace EQEmu_Patcher
             //VersionTypes.Secrets_Of_Feydwer, //sof
             //VersionTypes.Seeds_Of_Destruction, //sod
             VersionTypes.Rain_Of_Fear, //rof
-            VersionTypes.Rain_Of_Fear_2 //rof
+            VersionTypes.Rain_Of_Fear_2, //rof
             //VersionTypes.Broken_Mirror, //bro
+            VersionTypes.The_Outer_Brood //tob
         };
 
         private Dictionary<VersionTypes, ClientVersion> clientVersions = new Dictionary<VersionTypes, ClientVersion>();
@@ -137,7 +138,7 @@ namespace EQEmu_Patcher
 
             if (IniLibrary.instance.ClientVersion == VersionTypes.Unknown)
             {
-                detectClientVersion();
+                // detectClientVersion() already ran above; running it again showed the unknown-client prompt twice
                 if (currentVersion == VersionTypes.Unknown)
                 {
                     this.Close();
@@ -152,6 +153,7 @@ namespace EQEmu_Patcher
             if (currentVersion == VersionTypes.Broken_Mirror) suffix = "bro";
             if (currentVersion == VersionTypes.Secrets_Of_Feydwer) suffix = "sof";
             if (currentVersion == VersionTypes.Rain_Of_Fear || currentVersion == VersionTypes.Rain_Of_Fear_2) suffix = "rof";
+            if (currentVersion == VersionTypes.The_Outer_Brood) suffix = "tob";
 
             bool isSupported = false;
             foreach (var ver in supportedClients)
@@ -327,11 +329,21 @@ namespace EQEmu_Patcher
                         currentVersion = VersionTypes.Broken_Mirror;
                         splashLogo.Image = Properties.Resources.brokenmirror;
                         break;
+                    case "23DD81D7FAB1808DB93A9F6EC9BEA89C": // The Outer Brood, build Sep 11 2025 11:54:10 (Release Client #630), the build EQEmu supports
+                        currentVersion = VersionTypes.The_Outer_Brood;
+                        splashLogo.Image = Properties.Resources.rof;
+                        break;
                     default:
                         currentVersion = VersionTypes.Unknown;
                         break;
                 }
-                if (currentVersion == VersionTypes.Unknown)
+                if (currentVersion == VersionTypes.Unknown && UtilityLibrary.IsEverquestExecutable64Bit(AppDomain.CurrentDomain.BaseDirectory))
+                {
+                    // Every supported 64-bit client is pinned to one build, so an unknown 64-bit eqgame.exe is almost always a newer live build
+                    MessageBox.Show("This looks like a newer Everquest client than the server supports. Please use The Outer Brood client build from Sep 11 2025, and do not run LaunchPad.exe, which updates the client to the live build.");
+                    StatusLibrary.Log($"Unsupported 64-bit Everquest client: {hash}");
+                }
+                else if (currentVersion == VersionTypes.Unknown)
                 {
                     if (MessageBox.Show("Unable to recognize the Everquest client in this directory, open a web page to report to devs?", "Visit", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk) == DialogResult.Yes)
                     {
@@ -365,6 +377,7 @@ namespace EQEmu_Patcher
             clientVersions.Add(VersionTypes.Rain_Of_Fear_2, new ClientVersion("Rain of Fear 2", "rof2"));
             clientVersions.Add(VersionTypes.Underfoot, new ClientVersion("Underfoot", "underfoot"));
             clientVersions.Add(VersionTypes.Broken_Mirror, new ClientVersion("Broken Mirror", "brokenmirror"));
+            clientVersions.Add(VersionTypes.The_Outer_Brood, new ClientVersion("The Outer Brood", "tob"));
         }
 
 

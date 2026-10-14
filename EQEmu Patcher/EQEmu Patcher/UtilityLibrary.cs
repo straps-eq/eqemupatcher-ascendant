@@ -121,6 +121,25 @@ namespace EQEmu_Patcher
             return UtilityLibrary.GetMD5(files[0].FullName);
         }
 
+        // Returns true if eqgame.exe in path is a 64-bit (x64) executable
+        public static bool IsEverquestExecutable64Bit(string path)
+        {
+            try
+            {
+                using (var reader = new BinaryReader(File.OpenRead(Path.Combine(path, "eqgame.exe"))))
+                {
+                    reader.BaseStream.Seek(0x3C, SeekOrigin.Begin);
+                    var peOffset = reader.ReadInt32();
+                    reader.BaseStream.Seek(peOffset + 4, SeekOrigin.Begin);
+                    return reader.ReadUInt16() == 0x8664;
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         // Returns true only if the path is a relative and does not contain ..
         public static bool IsPathChild(string path)
         {

@@ -52,8 +52,10 @@ VersionTypes.Seeds_Of_Destruction, //sod
 VersionTypes.Rain_Of_Fear, //rof
 VersionTypes.Rain_Of_Fear_2 //rof
 VersionTypes.Broken_Mirror, //bro
+VersionTypes.The_Outer_Brood, //tob (only build Sep 11 2025 11:54:10)
 ```
 * Copy EQEmu Patcher\filelistbuilder.yml to filelistbuilder\rof\ and any other clients.
+* *ToB:* put ToB patch files in the repo's `tob/` folder (or host them and set the `TOB_STORAGE_URL` repo variable). Use ToB-format `spells_us.txt`/`dbstr_us.txt`; RoF2 files don't work in ToB. Listing `LaunchPad.exe` in `tob/delete.txt` stops players from updating their client to the live build.
 * Copy the files that need to be patched into filelistbuilder\rof\ and any other clients.
 * Edit filelistbuilder\rof\filelistbuilder.yml and change the downloadprefix line to match where the patches will be hosted. (For the example, it will be http://example.com/rof/). 
 * Run the filelistbuilder binary. If all succeeds, it will generate 2 new files: filelist_rof.yml and patch.zip. (the _rof suffix will change if you modify the client)
