@@ -21,6 +21,22 @@ namespace EQEmu_Patcher
         public string name { get; set; } // shown in the title bar, e.g. "Live"
         public string folder { get; set; } // client folder, e.g. "live" -> live/filelist_live.yml
         public List<string> hashes { get; set; } // eqgame.exe MD5s that use this folder
+        public string supported { get; set; } // optional: the build the server speaks now; older listed builds are updated through LaunchPad
+
+        public bool Matches(string hash)
+        {
+            if (hashes == null || hash == null) return false;
+            foreach (var entryHash in hashes)
+            {
+                if (entryHash != null && entryHash.Trim().Equals(hash, StringComparison.OrdinalIgnoreCase)) return true;
+            }
+            return false;
+        }
+
+        public bool IsSupported(string hash)
+        {
+            return string.IsNullOrWhiteSpace(supported) || supported.Trim().Equals(hash, StringComparison.OrdinalIgnoreCase);
+        }
     }
 
     class ServerClientList
@@ -50,13 +66,10 @@ namespace EQEmu_Patcher
                 if (entry == null || entry.hashes == null || entry.folder == null) continue;
                 // The folder becomes part of a URL, so only plain names are allowed
                 if (!folderPattern.IsMatch(entry.folder)) continue;
-                foreach (var entryHash in entry.hashes)
+                if (entry.Matches(hash))
                 {
-                    if (entryHash != null && entryHash.Trim().Equals(hash, StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (string.IsNullOrWhiteSpace(entry.name)) entry.name = entry.folder;
-                        return entry;
-                    }
+                    if (string.IsNullOrWhiteSpace(entry.name)) entry.name = entry.folder;
+                    return entry;
                 }
             }
             return null;

@@ -228,6 +228,12 @@ namespace EQEmu_Patcher
                 });
             }));
 
+            if (currentVersion == VersionTypes.Server_Listed && !await syncServerListedClient())
+            {
+                this.Close();
+                return;
+            }
+
             string webUrl = $"{filelistUrl}{suffix}/filelist_{suffix}.yml";
 
             string response = await DownloadFile(cts, webUrl, "filelist.yml");
@@ -365,6 +371,46 @@ namespace EQEmu_Patcher
                 MessageBox.Show("You need to run this program with Administrative Privileges" + err.Message);
                 return;
             }
+        }
+
+        // For a server-listed client with a supported build (live): keep LaunchPad disabled while the client is on
+        // that build, and run LaunchPad once when the client is on an older listed build. Returns false to stop the patcher.
+        private async Task<bool> syncServerListedClient()
+        {
+            if (string.IsNullOrWhiteSpace(serverClient.supported)) return true;
+
+            if (serverClient.IsSupported(exeHash))
+            {
+                string err = LaunchPadLibrary.Disable();
+                if (err != "") StatusLibrary.Log($"Couldn't disable LaunchPad.exe ({err}). Don't run it, or your client may update past what the server supports.");
+                return true;
+            }
+
+            if (!LaunchPadLibrary.Exists())
+            {
+                MessageBox.Show($"The server now supports a newer {serverClient.name} client, but LaunchPad.exe isn't in this folder to update it. Reinstall or repair the client with the Daybreak launcher, then run this patcher again.", serverName);
+                return false;
+            }
+
+            MessageBox.Show($"The server now supports a newer {serverClient.name} client, so your client needs its update.\r\n\r\nLaunchPad will open next. Log in, wait until it finishes updating, then close LaunchPad. Don't press Play in LaunchPad.\r\n\r\nThis patcher continues once LaunchPad is closed.", serverName);
+            StatusLibrary.Log("Waiting for LaunchPad to update the client and close...");
+            string runErr = await LaunchPadLibrary.RunAndWait();
+            if (runErr != "") StatusLibrary.Log($"LaunchPad: {runErr}");
+
+            exeHash = UtilityLibrary.GetEverquestExecutableHash(AppDomain.CurrentDomain.BaseDirectory);
+            if (serverClient.IsSupported(exeHash))
+            {
+                StatusLibrary.Log("Client updated to the build the server supports.");
+                return true;
+            }
+            if (serverClient.Matches(exeHash))
+            {
+                MessageBox.Show("Your client wasn't updated. Run this patcher again and let LaunchPad finish updating before you close it.", serverName);
+                return false;
+            }
+            MessageBox.Show("LaunchPad updated your client to a build the server doesn't support yet. Try again once the server has caught up.", serverName);
+            StatusLibrary.Log($"Unsupported Everquest client after LaunchPad update: {exeHash}");
+            return false;
         }
 
         // Called once neither the built-in hashes nor the server's clients.yml know eqgame.exe
