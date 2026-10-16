@@ -1,0 +1,14 @@
+# Host this file at FILELIST_URL (e.g. http://downloads.ascendanteq.com/ascendantpatch/clients.yml).
+# It adds clients without rebuilding the patcher. RoF2 and ToB are still detected by the hashes built
+# into the patcher; this list is only checked when eqgame.exe matches none of those.
+#
+# name:   shown in the patcher's title bar
+# folder: the client folder on the server; the patcher fetches <folder>/filelist_<folder>.yml
+#         (lowercase letters, digits, - and _ only)
+# hashes: eqgame.exe MD5s that use this folder. After each live update, add the new eqgame.exe MD5.
+#         Keep the previous one until every player has updated.
+clients:
+  - name: Live
+    folder: live
+    hashes:
+      - 18CF8F8352A6E04B7CFED734F6506B31 # live eqgame.exe dated 2026-09-17
