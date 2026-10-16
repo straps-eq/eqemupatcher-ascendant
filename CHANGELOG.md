@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- Added a server-hosted client list (`clients.yml` at FILELIST_URL). An eqgame.exe the built-in hashes don't know is looked up there and patched from the listed folder, e.g. `live/`, so new live builds need no patcher rebuild. RoF2 and ToB detection is unchanged.
 - Added The Outer Brood (ToB) client support, pinned to build Sep 11 2025 11:54:10 (eqgame.exe MD5 23DD81D7FAB1808DB93A9F6EC9BEA89C). ToB players get `filelist_tob.yml`; RoF2 is unchanged.
 - An unrecognized 64-bit eqgame.exe now gets a message to use the supported ToB build instead of the report-a-client prompt.
 - CI builds `filelist_tob.yml` from the `tob/` folder (override the file host with the `TOB_STORAGE_URL` repo variable).

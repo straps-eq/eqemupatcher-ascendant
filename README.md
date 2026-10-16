@@ -55,6 +55,7 @@ VersionTypes.Broken_Mirror, //bro
 VersionTypes.The_Outer_Brood, //tob (only build Sep 11 2025 11:54:10)
 ```
 * Copy EQEmu Patcher\filelistbuilder.yml to filelistbuilder\rof\ and any other clients.
+* *Clients without a rebuild (e.g. live):* host a `clients.yml` at your FILELIST_URL (see `clients.yml` in this repo). Each entry maps eqgame.exe MD5s to a client folder, so a `live` entry makes the patcher fetch `live/filelist_live.yml`. Built-in clients (RoF2, ToB) are matched first and never use the list. When the live client updates, add the new eqgame.exe MD5 to the entry; no patcher rebuild is needed. Build the folder's filelist with `client: live` in its filelistbuilder.yml.
 * *ToB:* put ToB patch files in the repo's `tob/` folder (or host them and set the `TOB_STORAGE_URL` repo variable). Use ToB-format `spells_us.txt`/`dbstr_us.txt`; RoF2 files don't work in ToB. Listing `LaunchPad.exe` in `tob/delete.txt` stops players from updating their client to the live build.
 * Copy the files that need to be patched into filelistbuilder\rof\ and any other clients.
 * Edit filelistbuilder\rof\filelistbuilder.yml and change the downloadprefix line to match where the patches will be hosted. (For the example, it will be http://example.com/rof/). 

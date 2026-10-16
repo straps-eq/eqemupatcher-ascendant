@@ -43,12 +43,15 @@ namespace EQEmu_Patcher
             VersionTypes.Rain_Of_Fear, //rof
             VersionTypes.Rain_Of_Fear_2, //rof
             //VersionTypes.Broken_Mirror, //bro
-            VersionTypes.The_Outer_Brood //tob
+            VersionTypes.The_Outer_Brood, //tob
+            VersionTypes.Server_Listed //folder from the server's clients.yml, e.g. live
         };
 
         private Dictionary<VersionTypes, ClientVersion> clientVersions = new Dictionary<VersionTypes, ClientVersion>();
 
         VersionTypes currentVersion;
+        string exeHash = ""; //MD5 of eqgame.exe
+        ServerClientEntry serverClient; //set when the server's clients.yml recognised eqgame.exe
 
        // TaskbarItemInfo tii = new TaskbarItemInfo();
         public MainForm()
@@ -120,6 +123,20 @@ namespace EQEmu_Patcher
             buildClientVersions();
             IniLibrary.Load();
             detectClientVersion();
+            if (currentVersion == VersionTypes.Unknown && exeHash != "")
+            {
+                // Clients the server added after this build (e.g. the monthly live update) are listed in clients.yml
+                serverClient = await ServerClientList.Find(cts, filelistUrl, exeHash);
+                if (serverClient != null)
+                {
+                    currentVersion = VersionTypes.Server_Listed;
+                    splashLogo.Image = Properties.Resources.rof;
+                }
+                else
+                {
+                    showUnknownClientMessage();
+                }
+            }
             isAutoPlay = (IniLibrary.instance.AutoPlay.ToLower() == "true");
             isAutoPatch = (IniLibrary.instance.AutoPatch.ToLower() == "true");
             chkAutoPlay.Checked = isAutoPlay;
@@ -154,6 +171,8 @@ namespace EQEmu_Patcher
             if (currentVersion == VersionTypes.Secrets_Of_Feydwer) suffix = "sof";
             if (currentVersion == VersionTypes.Rain_Of_Fear || currentVersion == VersionTypes.Rain_Of_Fear_2) suffix = "rof";
             if (currentVersion == VersionTypes.The_Outer_Brood) suffix = "tob";
+            if (currentVersion == VersionTypes.Server_Listed) suffix = serverClient.folder;
+            string clientName = (currentVersion == VersionTypes.Server_Listed) ? serverClient.name : currentVersion.ToString().Replace("_", " ");
 
             bool isSupported = false;
             foreach (var ver in supportedClients)
@@ -163,12 +182,12 @@ namespace EQEmu_Patcher
                 break;
             }
             if (!isSupported) {
-                MessageBox.Show("The server " + serverName + " does not work with this copy of Everquest (" + currentVersion.ToString().Replace("_", " ") + ")", serverName);
+                MessageBox.Show("The server " + serverName + " does not work with this copy of Everquest (" + clientName + ")", serverName);
                 this.Close();
                 return;
             }
 
-            this.Text = serverName + " (Client: " + currentVersion.ToString().Replace("_", " ") + ")";
+            this.Text = serverName + " (Client: " + clientName + ")";
             progressBar.Minimum = 0;
             progressBar.Maximum = 10000;
             progressBar.Value = 0;
@@ -284,6 +303,7 @@ namespace EQEmu_Patcher
             {
 
                 var hash = UtilityLibrary.GetEverquestExecutableHash(AppDomain.CurrentDomain.BaseDirectory);
+                exeHash = hash;
                 if (hash == "")
                 {
                     MessageBox.Show("Please run this patcher in your Everquest directory.");
@@ -337,25 +357,6 @@ namespace EQEmu_Patcher
                         currentVersion = VersionTypes.Unknown;
                         break;
                 }
-                if (currentVersion == VersionTypes.Unknown && UtilityLibrary.IsEverquestExecutable64Bit(AppDomain.CurrentDomain.BaseDirectory))
-                {
-                    // Every supported 64-bit client is pinned to one build, so an unknown 64-bit eqgame.exe is almost always a newer live build
-                    MessageBox.Show("This looks like a newer Everquest client than the server supports. Please use The Outer Brood client build from Sep 11 2025, and do not run LaunchPad.exe, which updates the client to the live build.");
-                    StatusLibrary.Log($"Unsupported 64-bit Everquest client: {hash}");
-                }
-                else if (currentVersion == VersionTypes.Unknown)
-                {
-                    if (MessageBox.Show("Unable to recognize the Everquest client in this directory, open a web page to report to devs?", "Visit", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk) == DialogResult.Yes)
-                    {
-                        System.Diagnostics.Process.Start("https://github.com/Xackery/eqemupatcher/issues/new?title=A+New+EQClient+Found&body=Hi+I+Found+A+New+Client!+Hash:+" + hash);
-                    }
-                    StatusLibrary.Log($"Unable to recognize the Everquest client in this directory, send to developers: {hash}");
-                }
-                else
-                {
-                    //StatusLibrary.Log($"You seem to have put me in a {clientVersions[currentVersion].FullName} client directory");
-                }
-
                 //MessageBox.Show(""+currentVersion);
                 //StatusLibrary.Log($"If you wish to help out, press the scan button on the bottom left and wait for it to complete, then copy paste this data as an Issue on github!");
             }
@@ -364,6 +365,23 @@ namespace EQEmu_Patcher
                 MessageBox.Show("You need to run this program with Administrative Privileges" + err.Message);
                 return;
             }
+        }
+
+        // Called once neither the built-in hashes nor the server's clients.yml know eqgame.exe
+        private void showUnknownClientMessage()
+        {
+            if (UtilityLibrary.IsEverquestExecutable64Bit(AppDomain.CurrentDomain.BaseDirectory))
+            {
+                // Built-in 64-bit clients are pinned to one build, so an unknown 64-bit eqgame.exe is usually a live build the server hasn't listed yet
+                MessageBox.Show("This Everquest client build isn't supported by the server yet. If you play on the live client and it just updated, try again once the server has caught up. Otherwise use The Outer Brood client build from Sep 11 2025, and do not run LaunchPad.exe on it.");
+                StatusLibrary.Log($"Unsupported 64-bit Everquest client: {exeHash}");
+                return;
+            }
+            if (MessageBox.Show("Unable to recognize the Everquest client in this directory, open a web page to report to devs?", "Visit", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk) == DialogResult.Yes)
+            {
+                System.Diagnostics.Process.Start("https://github.com/Xackery/eqemupatcher/issues/new?title=A+New+EQClient+Found&body=Hi+I+Found+A+New+Client!+Hash:+" + exeHash);
+            }
+            StatusLibrary.Log($"Unable to recognize the Everquest client in this directory, send to developers: {exeHash}");
         }
 
         //Build out all client version's dictionary

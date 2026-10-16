@@ -102,6 +102,7 @@
     <Compile Include="PatcherUrl.cs" />
     <Compile Include="PatchVersion.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="ServerClientList.cs" />
     <Compile Include="ServerName.cs" />
     <Compile Include="StatusLibrary.cs" />
     <Compile Include="UtilityLibrary.cs" />

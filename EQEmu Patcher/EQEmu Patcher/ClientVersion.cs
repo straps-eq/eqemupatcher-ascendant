@@ -16,7 +16,8 @@ namespace EQEmu_Patcher
         Underfoot,
         Secrets_Of_Feydwer,
         Broken_Mirror,
-        The_Outer_Brood
+        The_Outer_Brood,
+        Server_Listed // matched by the server's clients.yml, not a built-in hash
     }
 
     class ClientVersion
