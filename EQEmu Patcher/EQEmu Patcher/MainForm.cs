@@ -655,6 +655,10 @@ namespace EQEmu_Patcher
             }
 
             StatusLibrary.SetProgress(10000);
+            // Every file matches this filelist, so remember it even when nothing was downloaded;
+            // otherwise the Patch button stays red forever for a client that is already up to date
+            IniLibrary.instance.LastPatchedVersion = filelist.version;
+            IniLibrary.Save();
             if (patchedBytes == 0)
             {
                 string version = filelist.version;
@@ -669,8 +673,6 @@ namespace EQEmu_Patcher
 
             string elapsed = start.Elapsed.ToString("ss\\.ff");
             StatusLibrary.Log($"Complete! Patched {generateSize(patchedBytes)} in {elapsed} seconds. Press Play to begin.");
-            IniLibrary.instance.LastPatchedVersion = filelist.version;
-            IniLibrary.Save();
             return;
         }
 

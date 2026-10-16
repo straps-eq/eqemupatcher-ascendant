@@ -34,7 +34,7 @@ namespace EQEmu_Patcher
             try {
                 using (var input = File.OpenText($"{System.IO.Path.GetDirectoryName(Application.ExecutablePath)}\\eqemupatcher.yml"))
                 {
-                    var deserializerBuilder = new DeserializerBuilder().WithNamingConvention(new CamelCaseNamingConvention());
+                    var deserializerBuilder = new DeserializerBuilder().WithNamingConvention(new CamelCaseNamingConvention()).IgnoreUnmatchedProperties();
 
                     var deserializer = deserializerBuilder.Build();
 
@@ -47,6 +47,13 @@ namespace EQEmu_Patcher
                 }
             } catch (FileNotFoundException e) {
                 Console.WriteLine($"Failed loading config: {e.Message}");
+                ResetDefaults();
+                Save();
+            }
+            catch (Exception e)
+            {
+                // eqemupatcher.yml left by another server's patcher (e.g. clientVersion: Quarm) can't be read; start fresh
+                Console.WriteLine($"Unreadable config, resetting: {e.Message}");
                 ResetDefaults();
                 Save();
             }
