@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- The patcher sets the modified time of files listed in a server-hosted `<client>/filetimes.yml` on every start and patch run, e.g. the ToB achievement files that must match `Character:AchievementFileTime`.
 - The Patch button no longer stays red after a patch finds every file already up to date; the filelist version is now saved in that case too.
 - An `eqemupatcher.yml` the patcher can't read (e.g. one left by another server's patcher with `clientVersion: Quarm`) is now reset instead of crashing at startup with "Requested value ... was not found".
 - `clients.yml` entries can name a `supported` build. Live clients on it have LaunchPad.exe disabled so they can't update past it; clients on an older listed build are updated through LaunchPad, which the patcher runs and waits on. `tools/Update-Clients.ps1` hashes a new eqgame.exe and updates `clients.yml`.

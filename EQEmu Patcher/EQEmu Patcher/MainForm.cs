@@ -249,6 +249,9 @@ namespace EQEmu_Patcher
                 }
             }
 
+            await FileTimesLibrary.Load(cts, filelistUrl, suffix);
+            FileTimesLibrary.Apply();
+
             string url = $"{patcherUrl}{fileName}-hash.txt";
             try
             {
@@ -653,6 +656,9 @@ namespace EQEmu_Patcher
                     }
                 }
             }
+
+            // Downloads get a new modified time, and the time also matters for files that were already up to date
+            FileTimesLibrary.Apply();
 
             StatusLibrary.SetProgress(10000);
             // Every file matches this filelist, so remember it even when nothing was downloaded;

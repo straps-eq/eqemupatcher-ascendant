@@ -1,0 +1,17 @@
+# Host this file next to a client's filelist, e.g. http://downloads.ascendanteq.com/ascendantpatch/tob/filetimes.yml.
+# On every start and every patch run (also when nothing was downloaded) the patcher sets the "last modified"
+# time of each listed file that exists to the given time. File contents are never changed.
+#
+# time:  unix time in whole seconds (UTC)
+# files: paths relative to the EverQuest folder
+#
+# The achievement files below must match the server rule Character:AchievementFileTime. If you replace
+# them with new versions, pick a new time, put it here and in that rule.
+times:
+  - time: 1792003066 # 2026-10-14 18:37:46 UTC
+    files:
+      - Resources/Achievements/AchievementsClient.txt
+      - Resources/Achievements/AchievementComponentsClient.txt
+      - Resources/Achievements/AchievementCategories.txt
+      - Resources/Achievements/AchievementCategoryAssociationsClient.txt
+      - Resources/Achievements/AchievementAssociationsClient.txt

@@ -92,6 +92,7 @@
     <Compile Include="ClientVersion.cs" />
     <Compile Include="FileListUrl.cs" />
     <Compile Include="FileName.cs" />
+    <Compile Include="FileTimesLibrary.cs" />
     <Compile Include="IniLibrary.cs" />
     <Compile Include="LaunchPadLibrary.cs" />
     <Compile Include="MainForm.cs">
