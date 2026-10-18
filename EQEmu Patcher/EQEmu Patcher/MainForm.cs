@@ -239,7 +239,7 @@ namespace EQEmu_Patcher
             string response = await DownloadFile(cts, webUrl, "filelist.yml");
             if (response != "")
             {
-                webUrl = $"{filelistUrl}/filelist_{ suffix}.yml";
+                webUrl = $"{filelistUrl}filelist_{suffix}.yml";
                 response = await DownloadFile(cts, webUrl, "filelist.yml");
                 if (response != "")
                 {
@@ -301,7 +301,8 @@ namespace EQEmu_Patcher
             var path = System.IO.Path.GetDirectoryName(Application.ExecutablePath) + "\\eqemupatcher.png";
             if (File.Exists(path))
             {
-                splashLogo.Load(path);
+                // Load from memory so the file isn't held open; the filelist may need to overwrite it
+                splashLogo.Image = Image.FromStream(new MemoryStream(File.ReadAllBytes(path)));
             }
             cts.Cancel();
         }
