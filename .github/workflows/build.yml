@@ -19,6 +19,10 @@ env:
   PATCHER_URL: ${{ vars.PATCHER_URL == '' && format('https://github.com/{0}/releases/latest/download/', github.repository) || vars.PATCHER_URL }}
   STORAGE_URL: ${{ vars.STORAGE_URL == '' && format('https://raw.githubusercontent.com/{0}/master/rof/', github.repository) || vars.STORAGE_URL }}
   TOB_STORAGE_URL: ${{ vars.TOB_STORAGE_URL == '' && format('https://raw.githubusercontent.com/{0}/master/tob/', github.repository) || vars.TOB_STORAGE_URL }}
+  # Second patcher built from the same code for the Profusion server
+  PROFUSION_SERVER_NAME: ${{ vars.PROFUSION_SERVER_NAME == '' && 'Profusion EQ' || vars.PROFUSION_SERVER_NAME }}
+  PROFUSION_FILE_NAME: ${{ vars.PROFUSION_FILE_NAME == '' && 'EQ_Profusion_Patcher' || vars.PROFUSION_FILE_NAME }}
+  PROFUSION_URL: ${{ vars.PROFUSION_URL == '' && 'http://downloads.ascendanteq.com/profusionpatch/' || vars.PROFUSION_URL }}
 
 jobs:
   build:
@@ -53,6 +57,17 @@ jobs:
         cd "tob"
         ..\rof\filelistbuilder-win-x64.exe "tob" "${{env.TOB_STORAGE_URL}}"
 
+    - name: Build Profusion patcher
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        cd "EQEmu Patcher"
+        msbuild /m /t:Rebuild /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:VERSION="${{ env.VERSION }}.${{ github.run_number }}" /p:FILELIST_URL=${{env.PROFUSION_URL}} /p:PATCHER_URL=${{env.PROFUSION_URL}} /p:SERVER_NAME="${{env.PROFUSION_SERVER_NAME}}" /p:FILE_NAME="${{env.PROFUSION_FILE_NAME}}" "EQEmu Patcher.sln"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        $exe = "EQEmu Patcher/bin/Release/${{env.PROFUSION_FILE_NAME}}.exe"
+        Move-Item "EQEmu Patcher/bin/Release/eqemupatcher.exe" $exe
+        # Self-update compares this against the exe's own uppercase MD5
+        (Get-FileHash -Algorithm MD5 $exe).Hash | Set-Content -NoNewline -Encoding ascii "../${{env.PROFUSION_FILE_NAME}}-hash.txt"
+
     - name: Release
       uses: "marvinpinto/action-automatic-releases@latest"
       if: github.ref == 'refs/heads/master'
@@ -66,3 +81,5 @@ jobs:
           rof/filelist_rof.yml
           tob/filelist_tob.yml
           rof/${{env.FILE_NAME}}-hash.txt
+          EQEmu Patcher/EQEmu Patcher/bin/Release/${{env.PROFUSION_FILE_NAME}}.exe
+          ${{env.PROFUSION_FILE_NAME}}-hash.txt
