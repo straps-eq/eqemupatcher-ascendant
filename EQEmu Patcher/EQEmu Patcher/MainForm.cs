@@ -234,16 +234,21 @@ namespace EQEmu_Patcher
                 return;
             }
 
-            string webUrl = $"{filelistUrl}{suffix}/filelist_{suffix}.yml";
+            // filelistUrl always ends with "/" (see constructor), so no extra slash here.
+            string primaryUrl = $"{filelistUrl}{suffix}/filelist_{suffix}.yml";
 
-            string response = await DownloadFile(cts, webUrl, "filelist.yml");
+            string response = await DownloadFile(cts, primaryUrl, "filelist.yml");
             if (response != "")
             {
-                webUrl = $"{filelistUrl}/filelist_{ suffix}.yml";
-                response = await DownloadFile(cts, webUrl, "filelist.yml");
+                string primaryError = response;
+                string fallbackUrl = $"{filelistUrl}filelist_{suffix}.yml";
+                response = await DownloadFile(cts, fallbackUrl, "filelist.yml");
                 if (response != "")
                 {
-                    MessageBox.Show("Failed to fetch filelist from " + webUrl + ": " + response);
+                    MessageBox.Show(
+                        "Failed to fetch filelist.\r\n\r\n" +
+                        "Tried " + primaryUrl + ":\r\n" + primaryError + "\r\n\r\n" +
+                        "Then tried fallback " + fallbackUrl + ":\r\n" + response);
                     this.Close();
                     return;
                 }
@@ -561,7 +566,7 @@ namespace EQEmu_Patcher
             if (myHash != "" && isNeedingSelfUpdate)
             {
                 StatusLibrary.Log("Self update needed, starting with self patch...");
-                string url = $"{patcherUrl}/{fileName}.exe";
+                string url = $"{patcherUrl}{fileName}.exe";
                 try
                 {
                     var data = await Download(cts, url);
